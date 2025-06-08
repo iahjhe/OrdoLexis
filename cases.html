@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Cases - LexOrdo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2d3250;
+            --primary-light: #676f9d;
+            --secondary: #1cc88a;
+            --accent: #f9b17a;
+            --danger: #e74a3b;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-dark: rgba(0, 0, 0, 0.1);
+            --shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), 
+                      -8px -8px 15px rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(135deg, #2d3250, #424769);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Base */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 70px 1fr;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Navbar */
+        .navbar {
+            grid-column: 2;
+            grid-row: 1;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 1px;
+        }
+        
+        .logo-text span {
+            color: var(--accent);
+        }
+        
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notification-bell {
+            position: relative;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-icon {
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sidebar-icon.active {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon.active::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 30px;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--accent);
+        }
+        
+        /* Filter Card */
+        .filter-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .filter-card label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .filter-card .form-control,
+        .filter-card .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .filter-card .form-control:focus,
+        .filter-card .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(249, 177, 122, 0.25);
+            color: white;
+        }
+        
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-glass-primary {
+            background: rgba(28, 200, 138, 0.2);
+            border: 1px solid var(--secondary);
+            color: white;
+        }
+        
+        .btn-glass-primary:hover {
+            background: var(--secondary);
+        }
+        
+        /* Cases Table */
+        .cases-table-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cases-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .cases-table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 500;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        .cases-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        .cases-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        .cases-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .cases-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .cases-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .btn-table-action {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 0 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+        }
+        
+        .btn-table-action:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn-table-view:hover {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .btn-table-edit:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .btn-table-delete:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        
+        /* Pagination */
+        .pagination-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-link {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0 5px;
+            border-radius: 8px !important;
+        }
+        
+        .page-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .page-item.active .page-link {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--primary-dark);
+        }
+        
+        .page-item.disabled .page-link {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Modal */
+        .modal-glass {
+            background: rgba(45, 50, 80, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-glass .modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-glass .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-glass .btn-close {
+            filter: invert(1);
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .timeline-point {
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+        }
+        
+        .timeline-content {
+            padding-left: 10px;
+        }
+        
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 17px;
+            bottom: 0;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px auto 1fr;
+            }
+            
+            .navbar {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 2;
+                flex-direction: row;
+                height: 80px;
+                padding: 0 20px;
+                justify-content: space-around;
+            }
+            
+            .sidebar-icon.active::after {
+                left: 50%;
+                top: auto;
+                bottom: -10px;
+                transform: translateX(-50%);
+                width: 30px;
+                height: 4px;
+            }
+            
+            .main-content {
+                grid-column: 1;
+                grid-row: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo-text">Lex<span>Ordo</span></div>
+            <div class="nav-icons">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="user-avatar">
+            </div>
+        </nav>
+        
+        <!-- Sidebar -->
+<div class="sidebar">
+    <a href="index.html" class="sidebar-icon active" title="Dashboard">
+        <i class="fas fa-tachometer-alt"></i>
+    </a>
+    <a href="cases.html" class="sidebar-icon" title="Cases">
+        <i class="fas fa-folder"></i>
+    </a>
+    <a href="clients.html" class="sidebar-icon" title="Clients">
+        <i class="fas fa-users"></i>
+    </a>
+    <a href="calendar.html" class="sidebar-icon" title="Calendar">
+        <i class="fas fa-calendar"></i>
+    </a>
+    <a href="tasks.html" class="sidebar-icon" title="Tasks">
+        <i class="fas fa-tasks"></i>
+    </a>
+    <a href="reports.html" class="sidebar-icon" title="Reports">
+        <i class="fas fa-chart-bar"></i>
+    </a>
+    <a href="settings.html" class="sidebar-icon" title="Settings">
+        <i class="fas fa-cog"></i>
+    </a>
+</div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>All Cases</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-glass">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">All Cases</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <!-- Case Filters -->
+            <div class="filter-card glass-card">
+                <h5 class="mb-4">Filter Cases</h5>
+                <form>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="caseNumber">Case Number</label>
+                                <input type="text" class="form-control" id="caseNumber">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="clientName">Client Name</label>
+                                <input type="text" class="form-control" id="clientName">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="caseType">Case Type</label>
+                                <select class="form-select" id="caseType">
+                                    <option value="">All Types</option>
+                                    <option>Civil</option>
+                                    <option>Criminal</option>
+                                    <option>Family</option>
+                                    <option>Corporate</option>
+                                    <option>Contract</option>
+                                    <option>Property</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="caseStatus">Status</label>
+                                <select class="form-select" id="caseStatus">
+                                    <option value="">All Statuses</option>
+                                    <option>Active</option>
+                                    <option>Pending</option>
+                                    <option>Closed</option>
+                                    <option>Archived</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-glass">Reset</button>
+                            <button type="submit" class="btn btn-glass-primary">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Cases Table -->
+            <div class="cases-table-container glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Case List</h5>
+                    <a href="add-case.html" class="btn btn-glass-primary">
+                        <i class="fas fa-plus me-2"></i> Add New Case
+                    </a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="cases-table">
+                        <thead>
+                            <tr>
+                                <th>Case #</th>
+                                <th>Client</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Opened Date</th>
+                                <th>Next Hearing</th>
+                                <th>Assigned To</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>LC-2023-001</td>
+                                <td>Smith & Co.</td>
+                                <td>Corporate</td>
+                                <td><span class="badge bg-primary">Active</span></td>
+                                <td>Jan 15, 2023</td>
+                                <td>Jun 15, 2023</td>
+                                <td>John Doe</td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view" data-bs-toggle="modal" data-bs-target="#caseDetailsModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-002</td>
+                                <td>Johnson, Mary</td>
+                                <td>Family</td>
+                                <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                <td>Feb 3, 2023</td>
+                                <td>Jun 18, 2023</td>
+                                <td>Jane Smith</td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view" data-bs-toggle="modal" data-bs-target="#caseDetailsModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-003</td>
+                                <td>Williams, David</td>
+                                <td>Criminal</td>
+                                <td><span class="badge bg-danger">Urgent</span></td>
+                                <td>Mar 10, 2023</td>
+                                <td>Jun 10, 2023</td>
+                                <td>John Doe</td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view" data-bs-toggle="modal" data-bs-target="#caseDetailsModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-004</td>
+                                <td>Anderson LLP</td>
+                                <td>Contract</td>
+                                <td><span class="badge bg-success">Closed</span></td>
+                                <td>Apr 5, 2023</td>
+                                <td>-</td>
+                                <td>Jane Smith</td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view" data-bs-toggle="modal" data-bs-target="#caseDetailsModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-005</td>
+                                <td>Brown, Robert</td>
+                                <td>Property</td>
+                                <td><span class="badge bg-primary">Active</span></td>
+                                <td>May 12, 2023</td>
+                                <td>Jun 20, 2023</td>
+                                <td>John Doe</td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view" data-bs-toggle="modal" data-bs-target="#caseDetailsModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination pagination-glass justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Case Details Modal -->
+    <div class="modal fade modal-glass" id="caseDetailsModal" tabindex="-1" aria-labelledby="caseDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="caseDetailsModalLabel">Case Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Case Information</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th>Case Number:</th>
+                                    <td id="modalCaseNumber">LC-2023-001</td>
+                                </tr>
+                                <tr>
+                                    <th>Title:</th>
+                                    <td id="modalCaseTitle">Smith & Co. Corporate Matter</td>
+                                </tr>
+                                <tr>
+                                    <th>Type:</th>
+                                    <td id="modalCaseType">Corporate</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td><span id="modalCaseStatus" class="badge bg-primary">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Priority:</th>
+                                    <td id="modalCasePriority">High</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Client Information</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th>Client:</th>
+                                    <td id="modalClientName">Smith & Co.</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact:</th>
+                                    <td id="modalClientContact">John Smith (CEO)</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td id="modalClientPhone">(555) 123-4567</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td id="modalClientEmail">john.smith@smithco.com</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Dates</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th>Opened:</th>
+                                    <td id="modalCaseOpened">Jan 15, 2023</td>
+                                </tr>
+                                <tr>
+                                    <th>Next Hearing:</th>
+                                    <td id="modalNextHearing">Jun 15, 2023</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Updated:</th>
+                                    <td id="modalLastUpdated">May 30, 2023</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Assigned To</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th>Attorney:</th>
+                                    <td id="modalAssignedTo">John Doe</td>
+                                </tr>
+                                <tr>
+                                    <th>Paralegal:</th>
+                                    <td id="modalParalegal">Jane Smith</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Case Description</h6>
+                        <div id="modalCaseDescription" class="p-3 rounded" style="background: rgba(255,255,255,0.1);">
+                            <p>Corporate dispute regarding shareholder rights and board governance. The client alleges breach of fiduciary duty by the current board members. Seeking injunctive relief and damages.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Recent Activity</h6>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Jun 1, 2023</small>
+                                    <p>Motion for Summary Judgment filed</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">May 25, 2023</small>
+                                    <p>Client meeting to discuss strategy</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">May 15, 2023</small>
+                                    <p>Discovery responses submitted</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Edit Case</button>
+                    <button type="button" class="btn btn-outline-danger">Archive Case</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

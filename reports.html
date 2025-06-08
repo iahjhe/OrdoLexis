@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - LexOrdo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-dark: #2d3250;
+            --primary-light: #676f9d;
+            --secondary: #1cc88a;
+            --accent: #f9b17a;
+            --danger: #e74a3b;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-dark: rgba(0, 0, 0, 0.1);
+            --shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), 
+                      -8px -8px 15px rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(135deg, #2d3250, #424769);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Base */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 70px 1fr;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Navbar */
+        .navbar {
+            grid-column: 2;
+            grid-row: 1;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 1px;
+        }
+        
+        .logo-text span {
+            color: var(--accent);
+        }
+        
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notification-bell {
+            position: relative;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-icon {
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sidebar-icon.active {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon.active::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 30px;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--accent);
+        }
+        
+        /* Filter Card */
+        .filter-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .filter-card label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .filter-card .form-control,
+        .filter-card .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .filter-card .form-control:focus,
+        .filter-card .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(249, 177, 122, 0.25);
+            color: white;
+        }
+        
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-glass-primary {
+            background: rgba(28, 200, 138, 0.2);
+            border: 1px solid var(--secondary);
+            color: white;
+        }
+        
+        .btn-glass-primary:hover {
+            background: var(--secondary);
+        }
+        
+        /* Reports Cards */
+        .report-card {
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .report-card .card-title {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .report-card .card-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .report-card .card-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .report-card .card-change.positive {
+            color: var(--secondary);
+        }
+        
+        .report-card .card-change.negative {
+            color: var(--danger);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Cases Table */
+        .cases-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .cases-table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 500;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        .cases-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        .cases-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        .cases-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .cases-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .cases-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .btn-table-action {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 0 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+        }
+        
+        .btn-table-action:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn-table-view:hover {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .btn-table-edit:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .btn-table-delete:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        
+        /* Pagination */
+        .pagination-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-link {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0 5px;
+            border-radius: 8px !important;
+        }
+        
+        .page-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .page-item.active .page-link {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--primary-dark);
+        }
+        
+        .page-item.disabled .page-link {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Modal */
+        .modal-glass {
+            background: rgba(45, 50, 80, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-glass .modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-glass .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-glass .btn-close {
+            filter: invert(1);
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .timeline-point {
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+        }
+        
+        .timeline-content {
+            padding-left: 10px;
+        }
+        
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 17px;
+            bottom: 0;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px auto 1fr;
+            }
+            
+            .navbar {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 2;
+                flex-direction: row;
+                height: 80px;
+                padding: 0 20px;
+                justify-content: space-around;
+            }
+            
+            .sidebar-icon.active::after {
+                left: 50%;
+                top: auto;
+                bottom: -10px;
+                transform: translateX(-50%);
+                width: 30px;
+                height: 4px;
+            }
+            
+            .main-content {
+                grid-column: 1;
+                grid-row: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo-text">Lex<span>Ordo</span></div>
+            <div class="nav-icons">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="user-avatar">
+            </div>
+        </nav>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="index.html" class="sidebar-icon" title="Dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+            </a>
+            <a href="cases.html" class="sidebar-icon" title="Cases">
+                <i class="fas fa-folder"></i>
+            </a>
+            <a href="clients.html" class="sidebar-icon" title="Clients">
+                <i class="fas fa-users"></i>
+            </a>
+            <a href="calendar.html" class="sidebar-icon" title="Calendar">
+                <i class="fas fa-calendar"></i>
+            </a>
+            <a href="tasks.html" class="sidebar-icon" title="Tasks">
+                <i class="fas fa-tasks"></i>
+            </a>
+            <a href="reports.html" class="sidebar-icon active" title="Reports">
+                <i class="fas fa-chart-bar"></i>
+            </a>
+            <a href="settings.html" class="sidebar-icon" title="Settings">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Reports & Analytics</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-glass">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Reports</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="glass-card report-card">
+                        <h5 class="card-title">Total Cases</h5>
+                        <div class="card-value">142</div>
+                        <div class="card-change positive">
+                            <i class="fas fa-arrow-up me-2"></i> 12% from last month
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="glass-card report-card">
+                        <h5 class="card-title">Active Cases</h5>
+                        <div class="card-value">87</div>
+                        <div class="card-change positive">
+                            <i class="fas fa-arrow-up me-2"></i> 8% from last month
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="glass-card report-card">
+                        <h5 class="card-title">Revenue</h5>
+                        <div class="card-value">$124,580</div>
+                        <div class="card-change positive">
+                            <i class="fas fa-arrow-up me-2"></i> 22% from last quarter
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="glass-card report-card">
+                        <h5 class="card-title">Avg. Resolution</h5>
+                        <div class="card-value">64 days</div>
+                        <div class="card-change negative">
+                            <i class="fas fa-arrow-down me-2"></i> 5% from last quarter
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports Filter -->
+            <div class="filter-card glass-card mb-4">
+                <h5 class="mb-4">Report Filters</h5>
+                <form>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="reportType">Report Type</label>
+                                <select class="form-select" id="reportType">
+                                    <option>Case Overview</option>
+                                    <option>Financial Summary</option>
+                                    <option>Performance Metrics</option>
+                                    <option>Client Analytics</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="timePeriod">Time Period</label>
+                                <select class="form-select" id="timePeriod">
+                                    <option>Last 7 Days</option>
+                                    <option>Last 30 Days</option>
+                                    <option selected>Last Quarter</option>
+                                    <option>Last Year</option>
+                                    <option>Custom Range</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="caseType">Case Type</label>
+                                <select class="form-select" id="caseType">
+                                    <option value="">All Types</option>
+                                    <option>Civil</option>
+                                    <option>Criminal</option>
+                                    <option>Family</option>
+                                    <option>Corporate</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="assignedTo">Assigned To</label>
+                                <select class="form-select" id="assignedTo">
+                                    <option value="">All Attorneys</option>
+                                    <option>John Doe</option>
+                                    <option>Jane Smith</option>
+                                    <option>Robert Johnson</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-glass">Reset</button>
+                            <button type="submit" class="btn btn-glass-primary">Generate Report</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="glass-card p-4">
+                        <h5 class="mb-4">Case Status Overview</h5>
+                        <div class="chart-container">
+                            <canvas id="caseStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="glass-card p-4">
+                        <h5 class="mb-4">Case Type Distribution</h5>
+                        <div class="chart-container">
+                            <canvas id="caseTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="glass-card p-4">
+                        <h5 class="mb-4">Monthly Revenue</h5>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="glass-card p-4">
+                        <h5 class="mb-4">Case Resolution Time</h5>
+                        <div class="chart-container">
+                            <canvas id="resolutionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Cases Table -->
+            <div class="glass-card mt-4 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Top Performing Cases</h5>
+                    <button class="btn btn-glass-primary">
+                        <i class="fas fa-download me-2"></i> Export Data
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="cases-table">
+                        <thead>
+                            <tr>
+                                <th>Case #</th>
+                                <th>Client</th>
+                                <th>Type</th>
+                                <th>Revenue</th>
+                                <th>Hours</th>
+                                <th>ROI</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>LC-2023-042</td>
+                                <td>Anderson LLP</td>
+                                <td>Corporate</td>
+                                <td>$24,500</td>
+                                <td>85</td>
+                                <td>1.8x</td>
+                                <td><span class="badge bg-success">Closed</span></td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-015</td>
+                                <td>Williams, David</td>
+                                <td>Criminal</td>
+                                <td>$18,750</td>
+                                <td>62</td>
+                                <td>1.5x</td>
+                                <td><span class="badge bg-success">Closed</span></td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-078</td>
+                                <td>Smith & Co.</td>
+                                <td>Contract</td>
+                                <td>$32,000</td>
+                                <td>120</td>
+                                <td>1.4x</td>
+                                <td><span class="badge bg-primary">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-056</td>
+                                <td>Johnson, Mary</td>
+                                <td>Family</td>
+                                <td>$12,300</td>
+                                <td>45</td>
+                                <td>1.7x</td>
+                                <td><span class="badge bg-success">Closed</span></td>
+                            </tr>
+                            <tr>
+                                <td>LC-2023-033</td>
+                                <td>Brown, Robert</td>
+                                <td>Property</td>
+                                <td>$15,800</td>
+                                <td>58</td>
+                                <td>1.6x</td>
+                                <td><span class="badge bg-primary">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Case Status Chart
+        const caseStatusCtx = document.getElementById('caseStatusChart').getContext('2d');
+        const caseStatusChart = new Chart(caseStatusCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Active',
+                        data: [12, 19, 15, 22, 18, 24],
+                        backgroundColor: 'rgba(28, 200, 138, 0.7)',
+                        borderColor: 'rgba(28, 200, 138, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Pending',
+                        data: [8, 11, 9, 14, 12, 10],
+                        backgroundColor: 'rgba(249, 177, 122, 0.7)',
+                        borderColor: 'rgba(249, 177, 122, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Closed',
+                        data: [5, 7, 6, 9, 11, 8],
+                        backgroundColor: 'rgba(103, 111, 157, 0.7)',
+                        borderColor: 'rgba(103, 111, 157, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.8)'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Case Type Chart
+        const caseTypeCtx = document.getElementById('caseTypeChart').getContext('2d');
+        const caseTypeChart = new Chart(caseTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Corporate', 'Criminal', 'Family', 'Civil', 'Property', 'Contract'],
+                datasets: [{
+                    data: [25, 15, 20, 18, 12, 10],
+                    backgroundColor: [
+                        'rgba(28, 200, 138, 0.7)',
+                        'rgba(249, 177, 122, 0.7)',
+                        'rgba(103, 111, 157, 0.7)',
+                        'rgba(231, 74, 59, 0.7)',
+                        'rgba(45, 50, 80, 0.7)',
+                        'rgba(255, 206, 86, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(28, 200, 138, 1)',
+                        'rgba(249, 177, 122, 1)',
+                        'rgba(103, 111, 157, 1)',
+                        'rgba(231, 74, 59, 1)',
+                        'rgba(45, 50, 80, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.8)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [18500, 22400, 19800, 25600, 28700, 31500],
+                    fill: true,
+                    backgroundColor: 'rgba(28, 200, 138, 0.2)',
+                    borderColor: 'rgba(28, 200, 138, 1)',
+                    tension: 0.3,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Resolution Time Chart
+        const resolutionCtx = document.getElementById('resolutionChart').getContext('2d');
+        const resolutionChart = new Chart(resolutionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Corporate', 'Criminal', 'Family', 'Civil', 'Property'],
+                datasets: [{
+                    label: 'Avg. Days to Resolution',
+                    data: [45, 78, 92, 65, 58],
+                    backgroundColor: 'rgba(249, 177, 122, 0.7)',
+                    borderColor: 'rgba(249, 177, 122, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

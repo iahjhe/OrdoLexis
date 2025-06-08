@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - LexOrdo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2d3250;
+            --primary-light: #676f9d;
+            --secondary: #1cc88a;
+            --accent: #f9b17a;
+            --danger: #e74a3b;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-dark: rgba(0, 0, 0, 0.1);
+            --shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), 
+                      -8px -8px 15px rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(135deg, #2d3250, #424769);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Base */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 70px 1fr;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Navbar */
+        .navbar {
+            grid-column: 2;
+            grid-row: 1;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 1px;
+        }
+        
+        .logo-text span {
+            color: var(--accent);
+        }
+        
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notification-bell {
+            position: relative;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-icon {
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sidebar-icon.active {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon.active::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 30px;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--accent);
+        }
+        
+        /* Settings Card */
+        .settings-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-card .nav-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-card .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-right: 5px;
+        }
+        
+        .settings-card .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .settings-card .nav-link:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .settings-card .tab-content {
+            padding: 20px 0;
+        }
+        
+        .settings-card label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .settings-card .form-control,
+        .settings-card .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .settings-card .form-control:focus,
+        .settings-card .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(249, 177, 122, 0.25);
+            color: white;
+        }
+        
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-glass-primary {
+            background: rgba(28, 200, 138, 0.2);
+            border: 1px solid var(--secondary);
+            color: white;
+        }
+        
+        .btn-glass-primary:hover {
+            background: var(--secondary);
+        }
+        
+        /* Profile Image */
+        .profile-image-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .profile-image-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            cursor: pointer;
+            border: 2px solid var(--primary-dark);
+        }
+        
+        /* Switch */
+        .form-check-input {
+            width: 48px;
+            height: 24px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px auto 1fr;
+            }
+            
+            .navbar {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 2;
+                flex-direction: row;
+                height: 80px;
+                padding: 0 20px;
+                justify-content: space-around;
+            }
+            
+            .sidebar-icon.active::after {
+                left: 50%;
+                top: auto;
+                bottom: -10px;
+                transform: translateX(-50%);
+                width: 30px;
+                height: 4px;
+            }
+            
+            .main-content {
+                grid-column: 1;
+                grid-row: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo-text">Lex<span>Ordo</span></div>
+            <div class="nav-icons">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="user-avatar">
+            </div>
+        </nav>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="index.html" class="sidebar-icon" title="Dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+            </a>
+            <a href="cases.html" class="sidebar-icon" title="Cases">
+                <i class="fas fa-folder"></i>
+            </a>
+            <a href="clients.html" class="sidebar-icon" title="Clients">
+                <i class="fas fa-users"></i>
+            </a>
+            <a href="calendar.html" class="sidebar-icon" title="Calendar">
+                <i class="fas fa-calendar"></i>
+            </a>
+            <a href="tasks.html" class="sidebar-icon" title="Tasks">
+                <i class="fas fa-tasks"></i>
+            </a>
+            <a href="reports.html" class="sidebar-icon" title="Reports">
+                <i class="fas fa-chart-bar"></i>
+            </a>
+            <a href="settings.html" class="sidebar-icon active" title="Settings">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Settings</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-glass">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Settings</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <!-- Settings Card -->
+            <div class="settings-card glass-card">
+                <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">Profile</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">Security</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">Notifications</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button" role="tab">Preferences</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing" type="button" role="tab">Billing</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="settingsTabsContent">
+                    <!-- Profile Tab -->
+                    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                        <form>
+                            <div class="profile-image-container">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-image">
+                                <div class="profile-image-edit">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="firstName">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" value="Sarah">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="lastName">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" value="Johnson">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" value="sarah.johnson@example.com">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="phone">Phone</label>
+                                <input type="tel" class="form-control" id="phone" value="(555) 123-4567">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="position">Position</label>
+                                <input type="text" class="form-control" id="position" value="Senior Attorney">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="bio">Bio</label>
+                                <textarea class="form-control" id="bio" rows="3">Specialized in corporate law with 10+ years of experience. Focused on delivering exceptional legal services to clients.</textarea>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-glass">Cancel</button>
+                                <button type="submit" class="btn btn-glass-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Security Tab -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <form>
+                            <h5 class="mb-4">Change Password</h5>
+                            
+                            <div class="mb-3">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" class="form-control" id="newPassword">
+                                <small class="text-muted">Minimum 8 characters with at least one number and one special character</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword">
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-glass">Cancel</button>
+                                <button type="submit" class="btn btn-glass-primary">Update Password</button>
+                            </div>
+                            
+                            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+                            
+                            <h5 class="mb-4">Two-Factor Authentication</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">SMS Authentication</h6>
+                                    <p class="small text-muted mb-0">Receive a code via SMS when logging in</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsAuth" checked>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">Authenticator App</h6>
+                                    <p class="small text-muted mb-0">Use an authenticator app for 2FA</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="appAuth">
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Email Verification</h6>
+                                    <p class="small text-muted mb-0">Receive a verification code via email</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="emailAuth">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Notifications Tab -->
+                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                        <form>
+                            <h5 class="mb-4">Email Notifications</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">Case Updates</h6>
+                                    <p class="small text-muted mb-0">Receive emails about case status changes</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="caseUpdates" checked>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">Hearing Reminders</h6>
+                                    <p class="small text-muted mb-0">Get reminders for upcoming hearings</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="hearingReminders" checked>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">Document Uploads</h6>
+                                    <p class="small text-muted mb-0">Notify when new documents are uploaded</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="documentUploads" checked>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Task Assignments</h6>
+                                    <p class="small text-muted mb-0">Get notified when assigned new tasks</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="taskAssignments" checked>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+                            
+                            <h5 class="mb-4">In-App Notifications</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">Desktop Notifications</h6>
+                                    <p class="small text-muted mb-0">Show notifications on your desktop</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="desktopNotifications" checked>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">Sound Alerts</h6>
+                                    <p class="small text-muted mb-0">Play sound for important notifications</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="soundAlerts">
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-glass">Cancel</button>
+                                <button type="submit" class="btn btn-glass-primary">Save Preferences</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Preferences Tab -->
+                    <div class="tab-pane fade" id="preferences" role="tabpanel">
+                        <form>
+                            <h5 class="mb-4">Display Preferences</h5>
+                            
+                            <div class="mb-3">
+                                <label for="theme">Theme</label>
+                                <select class="form-select" id="theme">
+                                    <option selected>Dark (Default)</option>
+                                    <option>Light</option>
+                                    <option>System</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="density">Density</label>
+                                <select class="form-select" id="density">
+                                    <option selected>Comfortable</option>
+                                    <option>Compact</option>
+                                    <option>Spacious</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="timezone">Timezone</label>
+                                <select class="form-select" id="timezone">
+                                    <option selected>(UTC-05:00) Eastern Time</option>
+                                    <option>(UTC-06:00) Central Time</option>
+                                    <option>(UTC-07:00) Mountain Time</option>
+                                    <option>(UTC-08:00) Pacific Time</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="dateFormat">Date Format</label>
+                                <select class="form-select" id="dateFormat">
+                                    <option selected>MM/DD/YYYY</option>
+                                    <option>DD/MM/YYYY</option>
+                                    <option>YYYY-MM-DD</option>
+                                </select>
+                            </div>
+                            
+                            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+                            
+                            <h5 class="mb-4">Default Case View</h5>
+                            
+                            <div class="mb-3">
+                                <label for="defaultView">Default View</label>
+                                <select class="form-select" id="defaultView">
+                                    <option selected>List View</option>
+                                    <option>Card View</option>
+                                    <option>Calendar View</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="defaultSort">Default Sort</label>
+                                <select class="form-select" id="defaultSort">
+                                    <option selected>Most Recent</option>
+                                    <option>Case Number</option>
+                                    <option>Client Name</option>
+                                    <option>Next Hearing Date</option>
+                                </select>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-glass">Reset Defaults</button>
+                                <button type="submit" class="btn btn-glass-primary">Save Preferences</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Billing Tab -->
+                    <div class="tab-pane fade" id="billing" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-4">Subscription Plan</h5>
+                                
+                                <div class="glass-card p-4 mb-4">
+                                    <h4>Professional Plan</h4>
+                                    <p class="text-muted">Billed monthly at $49.99</p>
+                                    <ul class="ps-3">
+                                        <li>Unlimited Cases</li>
+                                        <li>5 Team Members</li>
+                                        <li>50GB Storage</li>
+                                        <li>Priority Support</li>
+                                    </ul>
+                                    <button class="btn btn-glass-primary w-100 mt-3">Upgrade Plan</button>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <button class="btn btn-outline-danger">Cancel Subscription</button>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5 class="mb-4">Payment Method</h5>
+                                
+                                <div class="glass-card p-4 mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <i class="fab fa-cc-visa fa-2x me-2"></i>
+                                            <span>Visa ending in 4242</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-glass">Edit</button>
+                                    </div>
+                                    <p class="small text-muted mb-0">Expires 04/2025</p>
+                                </div>
+                                
+                                <button class="btn btn-glass w-100 mb-4">
+                                    <i class="fas fa-plus me-2"></i> Add Payment Method
+                                </button>
+                                
+                                <h5 class="mb-4">Billing History</h5>
+                                
+                                <div class="glass-card p-3 mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-0">May 2023</h6>
+                                            <small class="text-muted">May 15, 2023</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <h6 class="mb-0">$49.99</h6>
+                                            <small><a href="#">Download Invoice</a></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="glass-card p-3 mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-0">April 2023</h6>
+                                            <small class="text-muted">Apr 15, 2023</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <h6 class="mb-0">$49.99</h6>
+                                            <small><a href="#">Download Invoice</a></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="glass-card p-3">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-0">March 2023</h6>
+                                            <small class="text-muted">Mar 15, 2023</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <h6 class="mb-0">$49.99</h6>
+                                            <small><a href="#">Download Invoice</a></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

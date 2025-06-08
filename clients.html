@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client List - LexOrdo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2d3250;
+            --primary-light: #676f9d;
+            --secondary: #1cc88a;
+            --accent: #f9b17a;
+            --danger: #e74a3b;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-dark: rgba(0, 0, 0, 0.1);
+            --shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), 
+                      -8px -8px 15px rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(135deg, #2d3250, #424769);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Base */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 70px 1fr;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Navbar */
+        .navbar {
+            grid-column: 2;
+            grid-row: 1;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 1px;
+        }
+        
+        .logo-text span {
+            color: var(--accent);
+        }
+        
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notification-bell {
+            position: relative;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-icon {
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sidebar-icon.active {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon.active::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 30px;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--accent);
+        }
+        
+        /* Filter Card */
+        .filter-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .filter-card label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .filter-card .form-control,
+        .filter-card .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .filter-card .form-control:focus,
+        .filter-card .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(249, 177, 122, 0.25);
+            color: white;
+        }
+        
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-glass-primary {
+            background: rgba(28, 200, 138, 0.2);
+            border: 1px solid var(--secondary);
+            color: white;
+        }
+        
+        .btn-glass-primary:hover {
+            background: var(--secondary);
+        }
+        
+        /* Clients Table */
+        .clients-table-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .clients-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .clients-table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 500;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        .clients-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        .clients-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        .clients-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .clients-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .clients-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .btn-table-action {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 0 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+        }
+        
+        .btn-table-action:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn-table-view:hover {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .btn-table-edit:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .btn-table-delete:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        
+        /* Pagination */
+        .pagination-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-link {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0 5px;
+            border-radius: 8px !important;
+        }
+        
+        .page-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .page-item.active .page-link {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--primary-dark);
+        }
+        
+        .page-item.disabled .page-link {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px auto 1fr;
+            }
+            
+            .navbar {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 2;
+                flex-direction: row;
+                height: 80px;
+                padding: 0 20px;
+                justify-content: space-around;
+            }
+            
+            .sidebar-icon.active::after {
+                left: 50%;
+                top: auto;
+                bottom: -10px;
+                transform: translateX(-50%);
+                width: 30px;
+                height: 4px;
+            }
+            
+            .main-content {
+                grid-column: 1;
+                grid-row: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo-text">Lex<span>Ordo</span></div>
+            <div class="nav-icons">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="user-avatar">
+            </div>
+        </nav>
+        
+        <!-- Sidebar -->
+<div class="sidebar">
+    <a href="index.html" class="sidebar-icon active" title="Dashboard">
+        <i class="fas fa-tachometer-alt"></i>
+    </a>
+    <a href="cases.html" class="sidebar-icon" title="Cases">
+        <i class="fas fa-folder"></i>
+    </a>
+    <a href="clients.html" class="sidebar-icon" title="Clients">
+        <i class="fas fa-users"></i>
+    </a>
+    <a href="calendar.html" class="sidebar-icon" title="Calendar">
+        <i class="fas fa-calendar"></i>
+    </a>
+    <a href="tasks.html" class="sidebar-icon" title="Tasks">
+        <i class="fas fa-tasks"></i>
+    </a>
+    <a href="reports.html" class="sidebar-icon" title="Reports">
+        <i class="fas fa-chart-bar"></i>
+    </a>
+    <a href="settings.html" class="sidebar-icon" title="Settings">
+        <i class="fas fa-cog"></i>
+    </a>
+</div>
+
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Client List</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-glass">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Client List</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <!-- Client Filters -->
+            <div class="filter-card glass-card">
+                <h5 class="mb-4">Filter Clients</h5>
+                <form>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="clientName">Client Name</label>
+                                <input type="text" class="form-control" id="clientName" placeholder="Search by name">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="clientType">Client Type</label>
+                                <select class="form-select" id="clientType">
+                                    <option value="">All Types</option>
+                                    <option>Individual</option>
+                                    <option>Business</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="clientStatus">Status</label>
+                                <select class="form-select" id="clientStatus">
+                                    <option value="">All Statuses</option>
+                                    <option>Active</option>
+                                    <option>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-glass">Reset</button>
+                            <button type="submit" class="btn btn-glass-primary">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Clients Table -->
+            <div class="clients-table-container glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Clients</h5>
+                    <a href="add-client.html" class="btn btn-glass-primary">
+                        <i class="fas fa-plus me-2"></i> Add New Client
+                    </a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="clients-table">
+                        <thead>
+                            <tr>
+                                <th>Client ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Active Cases</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CL-1001</td>
+                                <td>Smith & Co.</td>
+                                <td>Business</td>
+                                <td>contact@smithco.com</td>
+                                <td>(555) 123-4567</td>
+                                <td>2</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CL-1002</td>
+                                <td>Johnson, Mary</td>
+                                <td>Individual</td>
+                                <td>mary.johnson@email.com</td>
+                                <td>(555) 234-5678</td>
+                                <td>1</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CL-1003</td>
+                                <td>Williams, David</td>
+                                <td>Individual</td>
+                                <td>d.williams@email.com</td>
+                                <td>(555) 345-6789</td>
+                                <td>1</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CL-1004</td>
+                                <td>Anderson LLP</td>
+                                <td>Business</td>
+                                <td>legal@andersonllp.com</td>
+                                <td>(555) 456-7890</td>
+                                <td>0</td>
+                                <td><span class="badge bg-secondary">Inactive</span></td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CL-1005</td>
+                                <td>Brown, Robert</td>
+                                <td>Individual</td>
+                                <td>robert.brown@email.com</td>
+                                <td>(555) 567-8901</td>
+                                <td>1</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-table-action btn-table-view">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-table-action btn-table-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination pagination-glass justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

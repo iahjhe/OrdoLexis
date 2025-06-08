@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - LexOrdo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2d3250;
+            --primary-light: #676f9d;
+            --secondary: #1cc88a;
+            --accent: #f9b17a;
+            --danger: #e74a3b;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-dark: rgba(0, 0, 0, 0.1);
+            --shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), 
+                      -8px -8px 15px rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(135deg, #2d3250, #424769);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Base */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 70px 1fr;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Navbar */
+        .navbar {
+            grid-column: 2;
+            grid-row: 1;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 1px;
+        }
+        
+        .logo-text span {
+            color: var(--accent);
+        }
+        
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notification-bell {
+            position: relative;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-icon {
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sidebar-icon.active {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sidebar-icon.active::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 30px;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--accent);
+        }
+        
+        /* Calendar Container */
+        .calendar-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Calendar Tools */
+        .calendar-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-view {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-view:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-view.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        
+        .btn-add-event {
+            background: rgba(28, 200, 138, 0.2);
+            border: 1px solid var(--secondary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-add-event:hover {
+            background: var(--secondary);
+        }
+        
+        /* FullCalendar Customization */
+        .fc {
+            color: white;
+        }
+        
+        .fc-header-toolbar {
+            margin-bottom: 1.5em !important;
+            color: white;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .fc-button {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            border-radius: 8px !important;
+            transition: all 0.3s !important;
+        }
+        
+        .fc-button:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: var(--accent) !important;
+            border-color: var(--accent) !important;
+            color: var(--primary-dark) !important;
+        }
+        
+        .fc-col-header-cell {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .fc-daygrid-day {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .fc-daygrid-day.fc-day-today {
+            background: rgba(249, 177, 122, 0.2);
+        }
+        
+        .fc-event {
+            cursor: pointer;
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 4px 8px !important;
+            font-size: 0.85rem !important;
+        }
+        
+        .fc-event-title {
+            white-space: normal !important;
+            font-weight: 500;
+        }
+        
+        .fc-event-time {
+            font-weight: 400;
+            margin-right: 4px;
+        }
+        
+        /* Modal */
+        .modal-glass {
+            background: rgba(45, 50, 80, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-glass .modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 16px;
+        }
+        
+        .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-glass .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-glass .btn-close {
+            filter: invert(1);
+        }
+        
+        .modal-glass .form-control,
+        .modal-glass .form-select,
+        .modal-glass .form-textarea {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .modal-glass .form-control:focus,
+        .modal-glass .form-select:focus,
+        .modal-glass .form-textarea:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(249, 177, 122, 0.25);
+            color: white;
+        }
+        
+        .modal-glass .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px auto 1fr;
+            }
+            
+            .navbar {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 2;
+                flex-direction: row;
+                height: 80px;
+                padding: 0 20px;
+                justify-content: space-around;
+            }
+            
+            .sidebar-icon.active::after {
+                left: 50%;
+                top: auto;
+                bottom: -10px;
+                transform: translateX(-50%);
+                width: 30px;
+                height: 4px;
+            }
+            
+            .main-content {
+                grid-column: 1;
+                grid-row: 3;
+            }
+            
+            .calendar-tools {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+        .fc-day-header,.fc-daygrid-day-number,.fc-daygrid-event {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo-text">Lex<span>Ordo</span></div>
+            <div class="nav-icons">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="user-avatar">
+            </div>
+        </nav>
+        
+        <!-- Sidebar -->
+<div class="sidebar">
+    <a href="index.html" class="sidebar-icon active" title="Dashboard">
+        <i class="fas fa-tachometer-alt"></i>
+    </a>
+    <a href="cases.html" class="sidebar-icon" title="Cases">
+        <i class="fas fa-folder"></i>
+    </a>
+    <a href="clients.html" class="sidebar-icon" title="Clients">
+        <i class="fas fa-users"></i>
+    </a>
+    <a href="calendar.html" class="sidebar-icon" title="Calendar">
+        <i class="fas fa-calendar"></i>
+    </a>
+    <a href="tasks.html" class="sidebar-icon" title="Tasks">
+        <i class="fas fa-tasks"></i>
+    </a>
+    <a href="reports.html" class="sidebar-icon" title="Reports">
+        <i class="fas fa-chart-bar"></i>
+    </a>
+    <a href="settings.html" class="sidebar-icon" title="Settings">
+        <i class="fas fa-cog"></i>
+    </a>
+</div>
+
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Calendar</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-glass">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Calendar</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <!-- Calendar Container -->
+            <div class="calendar-container glass-card">
+                <div class="calendar-tools">
+                    <div class="view-toggle">
+                        <button id="dayView" class="btn-view white">Day</button>
+                        <button id="weekView" class="btn-view white">Week</button>
+                        <button id="monthView" class="btn-view active white">Month</button>
+                    </div>
+                    <button class="btn-add-event" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                        <i class="fas fa-plus me-2"></i> Add Event
+                    </button>
+                </div>
+                
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div class="modal fade modal-glass" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEventModalLabel">Add New Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="eventTitle" class="form-label">Event Title *</label>
+                                <input type="text" class="form-control" id="eventTitle" required placeholder="Enter event title">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="eventType" class="form-label">Event Type *</label>
+                                <select class="form-select" id="eventType" required>
+                                    <option value="">Select Type</option>
+                                    <option>Court Hearing</option>
+                                    <option>Client Meeting</option>
+                                    <option>Internal Meeting</option>
+                                    <option>Deadline</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Start Date *</label>
+                                <input type="datetime-local" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">End Date *</label>
+                                <input type="datetime-local" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="relatedCase" class="form-label">Related Case</label>
+                                <select class="form-select" id="relatedCase">
+                                    <option value="">Select Case</option>
+                                    <option>LC-2023-001 - Smith & Co.</option>
+                                    <option>LC-2023-002 - Johnson, Mary</option>
+                                    <option>LC-2023-003 - Williams, David</option>
+                                    <option>LC-2023-005 - Brown, Robert</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="eventColor" class="form-label">Color</label>
+                                <select class="form-select" id="eventColor">
+                                    <option value="#3788d8">Blue</option>
+                                    <option value="#28a745">Green</option>
+                                    <option value="#dc3545">Red</option>
+                                    <option value="#ffc107">Yellow</option>
+                                    <option value="#6f42c1">Purple</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="eventDescription" rows="3" placeholder="Enter event description"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-glass-primary" id="saveEvent">
+                        <i class="fas fa-save me-2"></i> Save Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize calendar
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: [
+                    {
+                        title: 'Court Hearing - Smith Case',
+                        start: new Date(new Date().setHours(10, 0, 0)),
+                        end: new Date(new Date().setHours(11, 30, 0)),
+                        color: '#dc3545',
+                        extendedProps: {
+                            type: 'Court Hearing',
+                            case: 'LC-2023-001',
+                            description: 'Preliminary hearing for Smith & Co. corporate matter'
+                        }
+                    },
+                    {
+                        title: 'Client Meeting - Johnson',
+                        start: new Date(new Date().setHours(14, 0, 0)),
+                        end: new Date(new Date().setHours(15, 0, 0)),
+                        color: '#28a745',
+                        extendedProps: {
+                            type: 'Client Meeting',
+                            case: 'LC-2023-002',
+                            description: 'Discuss case strategy with Mary Johnson'
+                        }
+                    },
+                    {
+                        title: 'Document Filing Deadline',
+                        start: new Date(new Date().setDate(new Date().getDate() + 2)),
+                        allDay: true,
+                        color: '#ffc107',
+                        extendedProps: {
+                            type: 'Deadline',
+                            case: 'LC-2023-003',
+                            description: 'Deadline for filing motion to dismiss'
+                        }
+                    },
+                    {
+                        title: 'Team Meeting',
+                        start: new Date(new Date().setDate(new Date().getDate() + 1)),
+                        start: new Date(new Date().setDate(new Date().getDate() + 1)),
+                        end: new Date(new Date().setDate(new Date().getDate() + 1)),
+                        color: '#6f42c1',
+                        extendedProps: {
+                            type: 'Internal Meeting',
+                            description: 'Weekly team status meeting'
+                        }
+                    }
+                ],
+                eventClick: function(info) {
+                    // Create a custom modal or alert with event details
+                    alert(
+                        'Event: ' + info.event.title + '\n' +
+                        'Type: ' + info.event.extendedProps.type + '\n' +
+                        (info.event.extendedProps.case ? 'Case: ' + info.event.extendedProps.case + '\n' : '') +
+                        (info.event.extendedProps.description ? 'Description: ' + info.event.extendedProps.description + '\n' : '') +
+                        'Start: ' + info.event.start.toLocaleString() + '\n' +
+                        (info.event.end ? 'End: ' + info.event.end.toLocaleString() : '')
+                    );
+                    info.jsEvent.preventDefault();
+                },
+                eventContent: function(arg) {
+                    // Customize event display
+                    return {
+                        html: `<div class="fc-event-main-frame">
+                            <div class="fc-event-time">${arg.timeText}</div>
+                            <div class="fc-event-title">${arg.event.title}</div>
+                        </div>`
+                    };
+                },
+                dayHeaderContent: function(arg) {
+                    // Customize day headers
+                    return { html: `<div class="fc-day-header white">${arg.text}</div>` };
+                },
+                nowIndicator: true,
+                navLinks: true,
+                editable: true,
+                selectable: true,
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
+                    startTime: '08:00',
+                    endTime: '18:00'
+                }
+            });
+            calendar.render();
+
+            // Set default datetime for new events
+            const now = new Date();
+            const defaultStart = new Date(now.setHours(now.getHours() + 1, 0, 0, 0)).toISOString().slice(0, 16);
+            const defaultEnd = new Date(now.setHours(now.getHours() + 1, 0, 0, 0)).toISOString().slice(0, 16);
+            document.getElementById('startDate').value = defaultStart;
+            document.getElementById('endDate').value = defaultEnd;
+
+            // View switching
+            $('#dayView').click(function() {
+                calendar.changeView('timeGridDay');
+                $(this).addClass('active').siblings().removeClass('active');
+            });
+            $('#weekView').click(function() {
+                calendar.changeView('timeGridWeek');
+                $(this).addClass('active').siblings().removeClass('active');
+            });
+            $('#monthView').click(function() {
+                calendar.changeView('dayGridMonth');
+                $(this).addClass('active').siblings().removeClass('active');
+            });
+
+            // Save event
+            $('#saveEvent').click(function() {
+                // Here you would normally save to a database
+                const newEvent = {
+                    title: $('#eventTitle').val(),
+                    start: $('#startDate').val(),
+                    end: $('#endDate').val(),
+                    color: $('#eventColor').val(),
+                    extendedProps: {
+                        type: $('#eventType').val(),
+                        case: $('#relatedCase').val(),
+                        description: $('#eventDescription').val()
+                    }
+                };
+                
+                calendar.addEvent(newEvent);
+                $('#addEventModal').modal('hide');
+                $('#eventForm')[0].reset();
+                
+                // Reset default times
+                const now = new Date();
+                const defaultStart = new Date(now.setHours(now.getHours() + 1, 0, 0, 0)).toISOString().slice(0, 16);
+                const defaultEnd = new Date(now.setHours(now.getHours() + 1, 0, 0, 0)).toISOString().slice(0, 16);
+                document.getElementById('startDate').value = defaultStart;
+                document.getElementById('endDate').value = defaultEnd;
+            });
+
+            // Simple animation for sidebar icons
+            document.querySelectorAll('.sidebar-icon').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    document.querySelectorAll('.sidebar-icon').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
